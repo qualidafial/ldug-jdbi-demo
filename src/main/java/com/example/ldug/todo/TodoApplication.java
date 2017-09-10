@@ -5,6 +5,7 @@ import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 
 import io.dropwizard.Application;
+import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
@@ -18,7 +19,7 @@ public class TodoApplication extends Application<TodoConfig> {
 
   @Override
   public void initialize(Bootstrap<TodoConfig> bootstrap) {
-
+    bootstrap.addBundle(new AssetsBundle("/assets", "/ui", "index.html"));
   }
 
   @Override
