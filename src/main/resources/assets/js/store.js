@@ -57,7 +57,7 @@
     callback = callback || function () {};
 
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', '/todo');
+    xhr.open('GET', '/api/todo');
     xhr.send();
     xhr.onreadystatechange = function() {
       if (xhr.readyState === DONE && xhr.status === 200) {
@@ -81,9 +81,9 @@
 
     // If an ID was actually given, find the item and update each property
     if (id) {
-      xhr.open('PATCH', '/todo/' + id);
+      xhr.open('PATCH', '/api/todo/' + id);
     } else {
-      xhr.open('POST', '/todo');
+      xhr.open('POST', '/api/todo');
     }
     xhr.setRequestHeader("Content-Type", "application/json");
     console.log('Sending payload', updateData);
@@ -104,7 +104,7 @@
    */
   Store.prototype.remove = function (id, callback) {
     var xhr = new XMLHttpRequest();
-    xhr.open('DELETE', '/todo/' + id);
+    xhr.open('DELETE', '/api/todo/' + id);
     xhr.send();
     xhr.onreadystatechange = function() {
       if (xhr.readyState === DONE && xhr.status === 204) {
@@ -120,7 +120,7 @@
    */
   Store.prototype.drop = function (callback) {
     var xhr = new XMLHttpRequest();
-    xhr.open('DELETE', '/todo');
+    xhr.open('DELETE', '/api/todo');
     xhr.send();
     xhr.onreadystatechange = function() {
       if (xhr.readyState === DONE && xhr.status === OK) {

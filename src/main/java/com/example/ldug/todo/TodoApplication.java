@@ -14,16 +14,17 @@ import org.glassfish.jersey.linking.DeclarativeLinkingFeature;
 public class TodoApplication extends Application<TodoConfig> {
 
   public static void main(String[] args) throws Exception {
-    new TodoApplication().run(new String[]{"server", "src/main/resources/config.yml"});
+    new TodoApplication().run("server", "src/main/resources/config.yml");
   }
 
   @Override
   public void initialize(Bootstrap<TodoConfig> bootstrap) {
-    bootstrap.addBundle(new AssetsBundle("/assets", "/ui", "index.html"));
+    bootstrap.addBundle(new AssetsBundle("/assets", "/", "index.html"));
   }
 
   @Override
   public void run(TodoConfig configuration, Environment environment) throws Exception {
+    environment.jersey().setUrlPattern("/api/*");
     environment.jersey().register(new TodoResource());
 
     environment.jersey().register(DeclarativeLinkingFeature.class);
