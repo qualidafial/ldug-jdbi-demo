@@ -2,6 +2,8 @@
 (function (window) {
   'use strict';
 
+  var DONE = 4;
+
   /**
    * Creates a new client side storage object and will create an empty
    * collection if no collection already exists.
@@ -11,19 +13,9 @@
    * real life you probably would be making AJAX calls
    */
   function Store(name, callback) {
-    callback = callback || function () {};
-
     this._dbName = name;
 
-    if (!localStorage[name]) {
-      var data = {
-        todos: []
-      };
-
-      localStorage[name] = JSON.stringify(data);
-    }
-
-    callback.call(this, JSON.parse(localStorage[name]));
+    this.findAll(callback);
   }
 
   /**
@@ -44,16 +36,16 @@
       return;
     }
 
-    var todos = JSON.parse(localStorage[this._dbName]).todos;
-
-    callback.call(this, todos.filter(function (todo) {
-      for (var q in query) {
-        if (query[q] !== todo[q]) {
-          return false;
+    this.findAll(function(todos) {
+      callback.call(this, todos.filter(function (todo) {
+        for (var q in query) {
+          if (query[q] !== todo[q]) {
+            return false;
+          }
         }
-      }
-      return true;
-    }));
+        return true;
+      }));
+    });
   };
 
   /**
@@ -63,7 +55,15 @@
    */
   Store.prototype.findAll = function (callback) {
     callback = callback || function () {};
-    callback.call(this, JSON.parse(localStorage[this._dbName]).todos);
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/todo');
+    xhr.send();
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === DONE && xhr.status === 200) {
+        callback.call(this, JSON.parse(xhr.responseText));
+      }
+    };
   };
 
   /**
@@ -75,32 +75,25 @@
    * @param {number} id An optional param to enter an ID of an item to update
    */
   Store.prototype.save = function (updateData, callback, id) {
-    var data = JSON.parse(localStorage[this._dbName]);
-    var todos = data.todos;
+    var self = this;
 
-    callback = callback || function () {};
+    var xhr = new XMLHttpRequest();
 
     // If an ID was actually given, find the item and update each property
     if (id) {
-      for (var i = 0; i < todos.length; i++) {
-        if (todos[i].id === id) {
-          for (var key in updateData) {
-            todos[i][key] = updateData[key];
-          }
-          break;
-        }
-      }
-
-      localStorage[this._dbName] = JSON.stringify(data);
-      callback.call(this, todos);
+      xhr.open('PATCH', '/todo/' + id);
     } else {
-      // Generate an ID
-      updateData.id = new Date().getTime();
-
-      todos.push(updateData);
-      localStorage[this._dbName] = JSON.stringify(data);
-      callback.call(this, [updateData]);
+      xhr.open('POST', '/todo');
     }
+    xhr.setRequestHeader("Content-Type", "application/json");
+    console.log('Sending payload', updateData);
+
+    xhr.send(JSON.stringify(updateData));
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === DONE && xhr.status === 200) {
+        self.findAll(callback);
+      }
+    };
   };
 
   /**
@@ -110,18 +103,14 @@
    * @param {function} callback The callback to fire after saving
    */
   Store.prototype.remove = function (id, callback) {
-    var data = JSON.parse(localStorage[this._dbName]);
-    var todos = data.todos;
-
-    for (var i = 0; i < todos.length; i++) {
-      if (todos[i].id == id) {
-        todos.splice(i, 1);
-        break;
+    var xhr = new XMLHttpRequest();
+    xhr.open('DELETE', '/todo/' + id);
+    xhr.send();
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === DONE && xhr.status === 204) {
+        self.findAll(callback);
       }
-    }
-
-    localStorage[this._dbName] = JSON.stringify(data);
-    callback.call(this, todos);
+    };
   };
 
   /**
@@ -130,9 +119,14 @@
    * @param {function} callback The callback to fire after dropping the data
    */
   Store.prototype.drop = function (callback) {
-    var data = {todos: []};
-    localStorage[this._dbName] = JSON.stringify(data);
-    callback.call(this, data.todos);
+    var xhr = new XMLHttpRequest();
+    xhr.open('DELETE', '/todo');
+    xhr.send();
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === DONE && xhr.status === OK) {
+        self.findAll(callback);
+      }
+    };
   };
 
   // Export to window
