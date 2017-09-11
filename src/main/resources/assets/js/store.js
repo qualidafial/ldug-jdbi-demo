@@ -61,6 +61,7 @@
     xhr.send();
     xhr.onreadystatechange = function() {
       if (xhr.readyState === DONE && xhr.status === 200) {
+        console.log("todos loaded");
         callback.call(this, JSON.parse(xhr.responseText));
       }
     };
@@ -81,8 +82,10 @@
 
     // If an ID was actually given, find the item and update each property
     if (id) {
+      console.log("updating todo");
       xhr.open('PATCH', '/api/todo/' + id);
     } else {
+      console.log("creating todo");
       xhr.open('POST', '/api/todo');
     }
     xhr.setRequestHeader("Content-Type", "application/json");
@@ -91,6 +94,7 @@
     xhr.send(JSON.stringify(updateData));
     xhr.onreadystatechange = function() {
       if (xhr.readyState === DONE && xhr.status === 200) {
+        console.log("todo saved", xhr.response);
         self.findAll(callback);
       }
     };
@@ -103,11 +107,14 @@
    * @param {function} callback The callback to fire after saving
    */
   Store.prototype.remove = function (id, callback) {
+    var self = this;
+
     var xhr = new XMLHttpRequest();
     xhr.open('DELETE', '/api/todo/' + id);
     xhr.send();
     xhr.onreadystatechange = function() {
       if (xhr.readyState === DONE && xhr.status === 204) {
+        console.log("todo deleted");
         self.findAll(callback);
       }
     };
@@ -119,6 +126,8 @@
    * @param {function} callback The callback to fire after dropping the data
    */
   Store.prototype.drop = function (callback) {
+    var self = this;
+
     var xhr = new XMLHttpRequest();
     xhr.open('DELETE', '/api/todo');
     xhr.send();
