@@ -16,7 +16,7 @@ http://localhost:8088/ to test out the app.
 Initially, the app saves todos in Java memory on the server, so todos will be lost
 whenever you restart the app.
 
-As you follow the tutorial, restart the app to see each take take effect.
+As you follow the tutorial, restart the app to see each change take effect.
 
 Let's begin!
 
@@ -90,7 +90,7 @@ public DataSourceFactory getDatabase() {
 }
 ```
 
-Add database configuration to the end config.yml:
+Add database configuration to the end of `config.yml`:
 
 ```yaml
 database:
@@ -109,7 +109,7 @@ database:
   minIdleTime: 1 minute
 ```
 
-Spin up `DataSource` on app startup, `TodoApplication.run()`:
+Spin up `DataSource` on app startup, in `TodoApplication.run()`:
 
 ```java
 log.info("creating data source");
@@ -130,7 +130,7 @@ environment.healthChecks().register("db", new HealthCheck() {
 
 ## Initialize database using Flyway migrations
 
-Add flyway-core dependency to the POM:
+Add flyway-core dependency to `pom.xml`:
 
 ```xml
 <properties>
@@ -298,3 +298,8 @@ public class TodoResource {
   }
 }
 ```
+
+TODO: Reorganize `TodoDao` and `TodoResource` to migrate them in tandem, one method
+at a time. For REST endpoints that can't be tested in the UI, use the browser to
+demonstrate them standalone (either in the dev tools console, or by navigating to the
+ReST resource).
