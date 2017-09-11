@@ -10,8 +10,11 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.glassfish.jersey.linking.DeclarativeLinkingFeature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TodoApplication extends Application<TodoConfig> {
+  private final Logger log = LoggerFactory.getLogger(getClass());
 
   public static void main(String[] args) throws Exception {
     new TodoApplication().run("server", "src/main/resources/config.yml");
@@ -25,9 +28,8 @@ public class TodoApplication extends Application<TodoConfig> {
   @Override
   public void run(TodoConfig configuration, Environment environment) throws Exception {
     environment.jersey().setUrlPattern("/api/*");
-    environment.jersey().register(new TodoResource());
-
     environment.jersey().register(DeclarativeLinkingFeature.class);
+    environment.jersey().register(TodoResource.class);
     addCorsHeader(environment);
   }
 

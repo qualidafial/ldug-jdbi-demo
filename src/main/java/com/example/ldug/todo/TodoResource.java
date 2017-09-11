@@ -1,15 +1,23 @@
 package com.example.ldug.todo;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+import javax.inject.Singleton;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+
 import com.google.common.collect.Maps;
 import io.dropwizard.jersey.PATCH;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import java.util.Collection;
-import java.util.Map;
-
 @Path("/todo")
 @Produces(MediaType.APPLICATION_JSON)
+@Singleton
 public class TodoResource {
 
     private Map<Integer, Todo> todos = Maps.newHashMap();
@@ -59,8 +67,12 @@ public class TodoResource {
     @Path("{id}")
     public Todo edit(@PathParam("id") int id, Todo patch) {
         Todo todo = todos.get(id);
-        Todo patchedTodo = todo.patchFrom(patch);
-        todos.put(id, patchedTodo);
-        return patchedTodo;
+
+        Optional.ofNullable(patch.getCompleted()).ifPresent(todo::setCompleted);
+        Optional.ofNullable(patch.getTitle()).ifPresent(todo::setTitle);
+
+        todos.put(id, todo);
+
+        return todo;
     }
 }

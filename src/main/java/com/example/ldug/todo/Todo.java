@@ -1,24 +1,16 @@
 package com.example.ldug.todo;
 
 import java.net.URI;
+import java.util.Objects;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.glassfish.jersey.linking.Binding;
 import org.glassfish.jersey.linking.InjectLink;
 
-@Getter
-@Setter
-@EqualsAndHashCode
-@NoArgsConstructor
 public class Todo {
 
+  private Integer id;
   private String title;
-  private int id;
   private Boolean completed;
-  private Integer order;
 
   @InjectLink(
       resource = TodoResource.class,
@@ -29,32 +21,63 @@ public class Todo {
   )
   private URI url;
 
-  public void setId(int id) {
+  public Todo() {
+  }
+
+  public Integer getId() {
+    return id;
+  }
+
+  public void setId(Integer id) {
     this.id = id;
+  }
+
+  public String getTitle() {
+    return title;
   }
 
   public void setTitle(String title) {
     this.title = title;
   }
 
-  public Todo patchFrom(Todo patch) {
-
-    if (patch.completed != null) {
-      completed = patch.completed;
-    }
-
-    if (patch.title != null) {
-      title = patch.title;
-    }
-
-    if (patch.order != null) {
-      order = patch.order;
-    }
-
-    return this;
+  public Boolean getCompleted() {
+    return completed;
   }
 
-  public void setCompleted(boolean completed) {
+  public void setCompleted(Boolean completed) {
     this.completed = completed;
+  }
+
+  public URI getUrl() {
+    return url;
+  }
+
+  public void setUrl(URI url) {
+    this.url = url;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Todo todo = (Todo) o;
+    return Objects.equals(id, todo.id) &&
+        Objects.equals(title, todo.title) &&
+        Objects.equals(completed, todo.completed);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, title, completed);
+  }
+
+  @Override
+  public String toString() {
+    return "Todo{" +
+        "id=" + id +
+        ", title='" + title + '\'' +
+        ", completed=" + completed +
+        ", url=" + url +
+        '}';
   }
 }
