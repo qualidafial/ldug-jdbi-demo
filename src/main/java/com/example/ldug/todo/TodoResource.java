@@ -21,53 +21,53 @@ import io.dropwizard.jersey.PATCH;
 @Singleton
 public class TodoResource {
 
-    private Map<Integer, Todo> todos = Maps.newHashMap();
-    private int counter = 0;
+  private Map<Integer, Todo> todos = Maps.newHashMap();
+  private int counter = 0;
 
-    @Inject
-    public TodoResource() {
-    }
+  @Inject
+  public TodoResource() {
+  }
 
-    @GET
-    public Collection<Todo> list() {
-        return todos.values();
-    }
+  @GET
+  public Collection<Todo> list() {
+    return todos.values();
+  }
 
-    @POST
-    public Todo create(Todo todo) {
-        todo.setId(++counter);
-        todo.setCompleted(false);
-        todos.put(counter, todo);
-        return todo;
-    }
+  @POST
+  public Todo create(Todo todo) {
+    todo.setId(++counter);
+    todo.setCompleted(false);
+    todos.put(counter, todo);
+    return todo;
+  }
 
-    @GET
-    @Path("{id}")
-    public Todo getById(@PathParam("id") int id) {
-        return todos.get(id);
-    }
+  @GET
+  @Path("{id}")
+  public Todo getById(@PathParam("id") int id) {
+    return todos.get(id);
+  }
 
-    @PATCH
-    @Path("{id}")
-    public Todo update(@PathParam("id") int id, Todo patch) {
-        Todo todo = todos.get(id);
+  @PATCH
+  @Path("{id}")
+  public Todo update(@PathParam("id") int id, Todo patch) {
+    Todo todo = todos.get(id);
 
-        Optional.ofNullable(patch.getCompleted()).ifPresent(todo::setCompleted);
-        Optional.ofNullable(patch.getTitle()).ifPresent(todo::setTitle);
+    Optional.ofNullable(patch.getCompleted()).ifPresent(todo::setCompleted);
+    Optional.ofNullable(patch.getTitle()).ifPresent(todo::setTitle);
 
-        todos.put(id, todo);
+    todos.put(id, todo);
 
-        return todo;
-    }
+    return todo;
+  }
 
-    @DELETE
-    @Path("{id}")
-    public void deleteById(@PathParam("id") int id) {
-        todos.remove(id);
-    }
+  @DELETE
+  @Path("{id}")
+  public void deleteById(@PathParam("id") int id) {
+    todos.remove(id);
+  }
 
-    @DELETE
-    public void deleteAll() {
-        todos.clear();
-    }
+  @DELETE
+  public void deleteAll() {
+    todos.clear();
+  }
 }
