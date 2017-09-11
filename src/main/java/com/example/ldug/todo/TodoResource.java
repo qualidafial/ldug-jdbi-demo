@@ -3,6 +3,7 @@ package com.example.ldug.todo;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -23,19 +24,21 @@ public class TodoResource {
     private Map<Integer, Todo> todos = Maps.newHashMap();
     private int counter = 0;
 
-    {
-        Todo changeOil = new Todo();
-        changeOil.setTitle("Change Oil");
-        addTodos(changeOil);
-
-        Todo buyMilk = new Todo();
-        buyMilk.setTitle("Buy Milk");
-        addTodos(buyMilk);
+    @Inject
+    public TodoResource() {
     }
 
     @GET
-    public Collection<Todo> get() {
+    public Collection<Todo> list() {
         return todos.values();
+    }
+
+    @POST
+    public Todo create(Todo todo) {
+        todo.setId(++counter);
+        todo.setCompleted(false);
+        todos.put(counter, todo);
+        return todo;
     }
 
     @GET
@@ -44,28 +47,9 @@ public class TodoResource {
         return todos.get(id);
     }
 
-    @POST
-    public Todo addTodos(Todo todo) {
-        todo.setId(++counter);
-        todo.setCompleted(false);
-        todos.put(counter, todo);
-        return todo;
-    }
-
-    @DELETE
-    public void delete() {
-        todos.clear();
-    }
-
-    @DELETE
-    @Path("{id}")
-    public void deleteById(@PathParam("id") int id) {
-        todos.remove(id);
-    }
-
     @PATCH
     @Path("{id}")
-    public Todo edit(@PathParam("id") int id, Todo patch) {
+    public Todo update(@PathParam("id") int id, Todo patch) {
         Todo todo = todos.get(id);
 
         Optional.ofNullable(patch.getCompleted()).ifPresent(todo::setCompleted);
@@ -74,5 +58,16 @@ public class TodoResource {
         todos.put(id, todo);
 
         return todo;
+    }
+
+    @DELETE
+    @Path("{id}")
+    public void deleteById(@PathParam("id") int id) {
+        todos.remove(id);
+    }
+
+    @DELETE
+    public void deleteAll() {
+        todos.clear();
     }
 }

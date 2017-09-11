@@ -77,6 +77,9 @@ Add dropwizard-db and postgresql dependencies to `pom.xml`:
 </dependencies>
 ```
 
+Note: Fold the new properties and dependencies above into the respective
+sections already in the POM.
+
 Add a `DataSourceFactory` property to `TodoConfig`:
 
 ```java
@@ -106,7 +109,7 @@ database:
   minIdleTime: 1 minute
 ```
 
-Spin up `DataSource` on app startup:
+Spin up `DataSource` on app startup, `TodoApplication.run()`:
 
 ```java
 log.info("creating data source");
@@ -127,7 +130,7 @@ environment.healthChecks().register("db", new HealthCheck() {
 
 ## Initialize database using Flyway migrations
 
-Add flyway-core dependency:
+Add flyway-core dependency to the POM:
 
 ```xml
 <properties>
@@ -154,7 +157,7 @@ create table todos (
 );
 ```
 
-Run database migrations on app startup:
+Run database migrations on app startup, in `TodoApplication.run()`:
 
 ```java
 log.info("running database migrations");
@@ -199,7 +202,8 @@ Add Jdbi dependencies to `pom.xml`:
 </dependencies>
 ```
 
-Bootstrap Jdbi on application startup, and bind it as an injectable dependency:
+Bootstrap Jdbi on application startup, and bind it as an injectable dependency
+in `TodoApplication.run():
 
 ```java
 log.info("bootstrapping jdbi");
@@ -222,12 +226,12 @@ public interface TodoDao {
   @SqlQuery("SELECT * FROM todos ORDER BY id")
   List<Todo> list();
 
-  @SqlQuery("SELECT * FROM todos WHERE id = ?")
-  Todo getById(int id);
-
   @SqlUpdate("INSERT INTO todos (title) VALUES (:title)")
   @GetGeneratedKeys
   Todo insert(@BindBean Todo todo);
+
+  @SqlQuery("SELECT * FROM todos WHERE id = ?")
+  Todo getById(int id);
 
   @SqlUpdate("UPDATE todos SET " +
       "title = coalesce(:title, title), " +
@@ -260,8 +264,13 @@ public class TodoResource {
   }
 
   @GET
-  public Collection<Todo> get() {
+  public Collection<Todo> list() {
     return dao.list();
+  }
+
+  @POST
+  public Todo create(Todo todo) {
+    return dao.insert(todo);
   }
 
   @GET
@@ -270,14 +279,11 @@ public class TodoResource {
     return dao.getById(id);
   }
 
-  @POST
-  public Todo addTodos(Todo todo) {
-    return dao.insert(todo);
-  }
-
-  @DELETE
-  public void delete() {
-    dao.deleteAll();
+  @PATCH
+  @Path("{id}")
+  public Todo update(@PathParam("id") int id, Todo patch) {
+    patch.setId(id);
+    return dao.update(patch);
   }
 
   @DELETE
@@ -286,11 +292,9 @@ public class TodoResource {
     dao.deleteById(id);
   }
 
-  @PATCH
-  @Path("{id}")
-  public Todo edit(@PathParam("id") int id, Todo patch) {
-    patch.setId(id);
-    return dao.update(patch);
+  @DELETE
+  public void deleteAll() {
+    dao.deleteAll();
   }
 }
 ```
